@@ -135,6 +135,15 @@ input[type="text"] {
     align-items: center;
     gap: 8px;
     font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.goals_div h2:hover {
+    background: rgba(37, 99, 235, 0.05);
 }
 
 .goals_div h2::before {
@@ -144,6 +153,18 @@ input[type="text"] {
     font-size: 14px;
     letter-spacing: -2px;
     opacity: 0.5;
+}
+
+#goals_toggle_icon {
+    font-size: 12px;
+    color: var(--brand);
+    font-style: normal;
+    transition: transform 0.2s ease;
+}
+
+#goals_content {
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .goals_div input[type="button"] {

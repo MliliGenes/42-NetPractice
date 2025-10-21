@@ -547,6 +547,37 @@ function dl_config()
 }
 
 
+function clearAllInputs()
+{
+    // Clear all editable route inputs
+    routes.forEach(function(elem) {
+        if (elem['route_edit'] == 'true') {
+            var routeInput = document.getElementById('route_'+elem['rid']);
+            if (routeInput) routeInput.value = '';
+        }
+        if (elem['gate_edit'] == 'true') {
+            var gateInput = document.getElementById('gate_'+elem['rid']);
+            if (gateInput) gateInput.value = '';
+        }
+    });
+    
+    // Clear all editable interface inputs
+    ifs.forEach(function(elem) {
+        if (elem['ip_edit'] == 'true') {
+            var ipInput = document.getElementById('ip_'+elem['if']);
+            if (ipInput) ipInput.value = '';
+        }
+        if (elem['mask_edit'] == 'true') {
+            var maskInput = document.getElementById('mask_'+elem['if']);
+            if (maskInput) maskInput.value = '';
+        }
+    });
+    
+    // Show confirmation
+    alert('All editable inputs have been cleared!');
+}
+
+
 function show_goals(g)
 {
     g_sim_logs += '******* Goal ID '+g['id']+' ********\n';
@@ -574,11 +605,11 @@ function all_goals()
 	g_sim_logs = '** generated for login "'+g_my_login+'" **\n';
     else
 	g_sim_logs = '** evaluation mode round '+g_eval_lvls.length+'**\n';
-    document.getElementById("goals_id").innerHTML = '<h2>Level '+level+' : </h2>\n';
+    document.getElementById("goals_id").innerHTML = '<h2 onclick="toggleGoalsPanel()" style="cursor: pointer; user-select: none;">Level '+level+' : <span id="goals_toggle_icon">▼</span></h2>\n<div id="goals_content">';
     
     var nb = 0;
     goals.forEach(elem => nb += show_goals(elem));
-    document.getElementById("goals_id").innerHTML += '<input type=button value="Check again" onclick="all_goals();"> <input type=button value="Get my config" onclick="dl_config();">';
+    document.getElementById("goals_id").innerHTML += '<input type=button value="Check again" onclick="all_goals();"> <input type=button value="Clear inputs" onclick="clearAllInputs();"> <input type=button value="Get my config" onclick="dl_config();">';
     if (nb == goals.length)
     {
 	if (g_my_login != '')
@@ -593,7 +624,23 @@ function all_goals()
 	    document.getElementById("goals_id").innerHTML += " <input type=button value='Next' onclick='window.location=next_eval();'>";
 	}		
     }
+    document.getElementById("goals_id").innerHTML += '</div>'; // Close goals_content div
     render_logs();
+}
+
+
+function toggleGoalsPanel()
+{
+    var content = document.getElementById('goals_content');
+    var icon = document.getElementById('goals_toggle_icon');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.textContent = '▼';
+    } else {
+        content.style.display = 'none';
+        icon.textContent = '▶';
+    }
 }
 
 
