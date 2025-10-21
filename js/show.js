@@ -112,12 +112,63 @@ function show_host(root, h)
     if (tab.length != 2) err("host id "+h['id'], "labelpos parsing");
     h['lx'] = parseInt(tab[0]);
     h['ly'] = parseInt(tab[1]);
+    
+    // Check for overlaps with interfaces and adjust routing table position
+    var finalLx = h['lx'];
+    var finalLy = h['ly'];
+    var minDistance = 150; // Minimum distance from interface cards
+    
+    // Try to find a position that doesn't overlap with interfaces
+    var labelOffsetOptions = [
+        {x: 0, y: 0},          // Original
+        {x: 0, y: 120},        // Below
+        {x: 0, y: -120},       // Above
+        {x: 200, y: 0},        // Right
+        {x: -200, y: 0},       // Left
+        {x: 200, y: 120},      // Bottom-right
+        {x: -200, y: 120},     // Bottom-left
+        {x: 200, y: -120},     // Top-right
+        {x: -200, y: -120}     // Top-left
+    ];
+    
+    var foundLabelPos = false;
+    for (var i = 0; i < labelOffsetOptions.length && !foundLabelPos; i++) {
+        var testLx = h['lx'] + labelOffsetOptions[i].x;
+        var testLy = h['ly'] + labelOffsetOptions[i].y;
+        var hasOverlap = false;
+        
+        // Check against all interfaces on this host
+        ifs.forEach(function(itf) {
+            if (itf['hid'] === h['id'] && itf['dx'] !== undefined && itf['dy'] !== undefined) {
+                var distance = Math.sqrt(
+                    Math.pow(testLx - itf['dx'], 2) + 
+                    Math.pow(testLy - itf['dy'], 2)
+                );
+                
+                if (distance < minDistance) {
+                    hasOverlap = true;
+                }
+            }
+        });
+        
+        if (!hasOverlap) {
+            finalLx = testLx;
+            finalLy = testLy;
+            foundLabelPos = true;
+        }
+    }
+    
+    // Store final position on host object for later use
+    h['finalLx'] = finalLx;
+    h['finalLy'] = finalLy;
 
     var newelem = document.createElement('div');
     newelem.className = 'host_info_div';
+    newelem.setAttribute('data-routing-table', 'true');
+    newelem.setAttribute('data-host-id', h['id']);
     newelem.style.position = "absolute";
-    newelem.style.top = (h['y']+h['ly'])+'px';
-    newelem.style.left = (h['x']+h['lx'])+'px';
+    newelem.style.top = (h['y']+finalLy)+'px';
+    newelem.style.left = (h['x']+finalLx)+'px';
     var label = '<table><tr><td>'+h['type']+' '+h['id']+': <i>'+h['name']+'</id></td></tr>';
     var str = '';
     routes.forEach(r => {if (h['id'] == r['hid']) { str += '<tr><td>'+get_route_info(r)+'</td></tr>\n'; r['h'] = h;}});
@@ -174,17 +225,18 @@ function show_ifs(root, itf)
     var baseDx = parseInt(tab[0]);
     var baseDy = parseInt(tab[1]);
     
-    // Check for overlaps with existing interfaces on same host and adjust
+    // Improved overlap detection with better spacing
     var finalDx = baseDx;
     var finalDy = baseDy;
-    var minDistance = 200; // Minimum distance between interfaces (200px)
+    var minDistance = 210; // Minimum distance between interface centers
     
     // Collect all existing interface positions on the same host
     var existingPositions = [];
     ifs.forEach(function(otherItf) {
         if (otherItf['if'] !== itf['if'] && 
             otherItf['hid'] === itf['hid'] && 
-            otherItf['dx'] !== undefined) {
+            otherItf['dx'] !== undefined && 
+            otherItf['dy'] !== undefined) {
             existingPositions.push({
                 dx: otherItf['dx'],
                 dy: otherItf['dy']
@@ -192,23 +244,29 @@ function show_ifs(root, itf)
         }
     });
     
-    // If there are existing interfaces, try to find a non-overlapping position
+    // If there are existing interfaces, find non-overlapping position
     if (existingPositions.length > 0) {
         var foundPosition = false;
+        
+        // Try these offset positions in order
         var offsetOptions = [
-            {x: 0, y: 0},        // Original position
-            {x: 0, y: 100},      // Below
-            {x: 0, y: -100},     // Above
-            {x: 220, y: 0},      // Right
-            {x: -220, y: 0},     // Left
-            {x: 220, y: 100},    // Bottom-right
-            {x: -220, y: 100},   // Bottom-left
-            {x: 220, y: -100},   // Top-right
-            {x: -220, y: -100},  // Top-left
-            {x: 0, y: 200},      // Far below
-            {x: 0, y: -200},     // Far above
-            {x: 440, y: 0},      // Far right
-            {x: -440, y: 0}      // Far left
+            {x: 0, y: 0},          // Original
+            {x: 0, y: 110},        // Below
+            {x: 0, y: -110},       // Above
+            {x: 210, y: 0},        // Right
+            {x: -210, y: 0},       // Left
+            {x: 210, y: 110},      // Bottom-right
+            {x: -210, y: 110},     // Bottom-left
+            {x: 210, y: -110},     // Top-right
+            {x: -210, y: -110},    // Top-left
+            {x: 0, y: 220},        // Far below
+            {x: 0, y: -220},       // Far above
+            {x: 420, y: 0},        // Far right
+            {x: -420, y: 0},       // Far left
+            {x: 315, y: 0},        // Medium right
+            {x: -315, y: 0},       // Medium left
+            {x: 315, y: 110},      // Medium bottom-right
+            {x: -315, y: 110}      // Medium bottom-left
         ];
         
         for (var i = 0; i < offsetOptions.length && !foundPosition; i++) {
@@ -216,7 +274,7 @@ function show_ifs(root, itf)
             var testDy = baseDy + offsetOptions[i].y;
             var hasOverlap = false;
             
-            // Check against all existing positions
+            // Check distance to all existing interfaces
             for (var j = 0; j < existingPositions.length; j++) {
                 var distance = Math.sqrt(
                     Math.pow(testDx - existingPositions[j].dx, 2) + 
@@ -247,10 +305,16 @@ function show_ifs(root, itf)
 	newelem.style.position = "absolute";
 	newelem.style.top = (itf['h']['y']+itf['dy'])+'px';
 	newelem.style.left = (itf['h']['x']+itf['dx'])+'px';
+	newelem.setAttribute('data-interface-id', itf['if']);
+	newelem.setAttribute('data-draggable', 'true');
+	newelem.style.cursor = 'move';
 	if (itf['ip_edit'] == 'true') ip_active = ''; else ip_active = 'disabled';
 	if (itf['mask_edit'] == 'true') mask_active = ''; else mask_active = 'disabled';
 	newelem.innerHTML = '<table class=if_tab><tr><td colspan=3 style="text-align:center;">interface '+itf['if']+'</td></tr><tr><td>IP</td><td> : </td><td><input size=15 type=text id=ip_'+itf['if']+' value="'+itf['ip']+'" '+ip_active+'><td></tr><tr><td>Mask</td><td> : </td><td><input size=15 type=text id=mask_'+itf['if']+' value="'+itf['mask']+'" '+mask_active+'></td></tr></table>';
 	root.appendChild(newelem);
+	
+	// Store reference for dragging
+	itf['element'] = newelem;
     }
 }
 
@@ -282,6 +346,141 @@ function draw_links(parent, l)
     aLine.setAttribute('stroke', "#9ca3af");
     aLine.setAttribute('stroke-width', 2);
     svg.appendChild(aLine);
+}
+
+
+// Draw visual connections between interfaces and routing table of their host
+function drawInterfaceConnections(parent) {
+    var svg = document.getElementById('sl');
+    if (!svg) return;
+    
+    // For each host, draw lines from host center to each interface
+    hosts.forEach(function(h) {
+        var hostCenterX = parseInt(h['x']) + parseInt(h['w']) / 2;
+        var hostCenterY = parseInt(h['y']) + parseInt(h['h']) / 2;
+        
+        // Draw lines to each interface on this host
+        ifs.forEach(function(itf) {
+            if (itf['hid'] === h['id'] && itf['type'] === 'std') {
+                // Get the current position from the DOM element (for draggable interfaces)
+                var interfaceDiv = document.querySelector('.itf_div[data-interface-id="' + itf['if'] + '"]');
+                if (!interfaceDiv) return;
+                
+                var rect = interfaceDiv.getBoundingClientRect();
+                var canvasWrapper = document.getElementById('canvas_wrapper');
+                var canvasRect = canvasWrapper ? canvasWrapper.getBoundingClientRect() : {left: 0, top: 0};
+                
+                // Calculate interface center (accounting for canvas transform)
+                var itfCenterX = (rect.left - canvasRect.left) / canvasState.scale + (rect.width / canvasState.scale) / 2;
+                var itfCenterY = (rect.top - canvasRect.top) / canvasState.scale + (rect.height / canvasState.scale) / 2;
+                
+                // Draw dotted line from host center to interface
+                var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', hostCenterX);
+                line.setAttribute('y1', hostCenterY);
+                line.setAttribute('x2', itfCenterX);
+                line.setAttribute('y2', itfCenterY);
+                line.setAttribute('stroke', '#cbd5e1'); // Light gray
+                line.setAttribute('stroke-width', '1.5');
+                line.setAttribute('stroke-dasharray', '4,3'); // Dotted line
+                line.setAttribute('opacity', '0.6');
+                line.setAttribute('class', 'interface-connection');
+                svg.appendChild(line); // Add to end so it's visible
+            }
+        });
+        
+        // Draw line from host center to routing table (if it has routes)
+        var hasRoutes = false;
+        routes.forEach(function(r) {
+            if (r['hid'] === h['id']) {
+                hasRoutes = true;
+            }
+        });
+        
+        if (hasRoutes) {
+            // Get the actual routing table position from the DOM
+            var routingTable = document.querySelector('[data-routing-table="true"][data-host-id="' + h['id'] + '"]');
+            if (routingTable) {
+                var tableRect = routingTable.getBoundingClientRect();
+                var canvasWrapper = document.getElementById('canvas_wrapper');
+                var canvasRect = canvasWrapper ? canvasWrapper.getBoundingClientRect() : {left: 0, top: 0};
+                
+                // Calculate routing table center (accounting for canvas transform)
+                var routeTableX = (tableRect.left - canvasRect.left) / canvasState.scale + (tableRect.width / canvasState.scale) / 2;
+                var routeTableY = (tableRect.top - canvasRect.top) / canvasState.scale + (tableRect.height / canvasState.scale) / 2;
+                
+                var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', hostCenterX);
+                line.setAttribute('y1', hostCenterY);
+                line.setAttribute('x2', routeTableX);
+                line.setAttribute('y2', routeTableY);
+                line.setAttribute('stroke', '#94a3b8'); // Slightly darker gray
+                line.setAttribute('stroke-width', '1.5');
+                line.setAttribute('stroke-dasharray', '6,4'); // Different dash pattern
+                line.setAttribute('opacity', '0.5');
+                line.setAttribute('class', 'routing-connection');
+                svg.appendChild(line); // Add to end so it's visible
+            }
+        }
+    });
+    
+    // Draw blue topology lines: host↔router/switch and router↔internet
+    links.forEach(function(link) {
+        if (!link['h1'] || !link['h2']) return;
+        
+        var h1Type = link['h1']['type'];
+        var h2Type = link['h2']['type'];
+        
+        // Determine if this connection should have a blue line
+        var shouldDrawBlue = false;
+        
+        // Host connected to Host (direct connection in early levels)
+        if (h1Type === 'host' && h2Type === 'host') {
+            shouldDrawBlue = true;
+        }
+        
+        // Host connected to Router or Switch
+        if ((h1Type === 'host' && (h2Type === 'router' || h2Type === 'switch')) ||
+            (h2Type === 'host' && (h1Type === 'router' || h1Type === 'switch'))) {
+            shouldDrawBlue = true;
+        }
+        
+        // Router connected to Internet
+        if ((h1Type === 'router' && h2Type === 'internet') ||
+            (h2Type === 'router' && h1Type === 'internet')) {
+            shouldDrawBlue = true;
+        }
+        
+        // Router connected to Router
+        if (h1Type === 'router' && h2Type === 'router') {
+            shouldDrawBlue = true;
+        }
+        
+        // Switch connected to Router
+        if ((h1Type === 'switch' && h2Type === 'router') ||
+            (h2Type === 'switch' && h1Type === 'router')) {
+            shouldDrawBlue = true;
+        }
+        
+        if (shouldDrawBlue) {
+            var h1CenterX = parseInt(link['h1']['x']) + parseInt(link['h1']['w']) / 2;
+            var h1CenterY = parseInt(link['h1']['y']) + parseInt(link['h1']['h']) / 2;
+            var h2CenterX = parseInt(link['h2']['x']) + parseInt(link['h2']['w']) / 2;
+            var h2CenterY = parseInt(link['h2']['y']) + parseInt(link['h2']['h']) / 2;
+            
+            var connectionLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            connectionLine.setAttribute('x1', h1CenterX);
+            connectionLine.setAttribute('y1', h1CenterY);
+            connectionLine.setAttribute('x2', h2CenterX);
+            connectionLine.setAttribute('y2', h2CenterY);
+            connectionLine.setAttribute('stroke', '#3b82f6'); // Blue color
+            connectionLine.setAttribute('stroke-width', '2.5');
+            connectionLine.setAttribute('stroke-dasharray', '8,4'); // Dashed line
+            connectionLine.setAttribute('opacity', '0.5');
+            connectionLine.setAttribute('class', 'topology-connection');
+            svg.appendChild(connectionLine);
+        }
+    });
 }
 
 
@@ -365,9 +564,6 @@ function show_goals(g)
 	dst_txt = g['h2']['name'];
     div.innerHTML += '<i>'+g['src_name']+" <b>"+src_txt+'</b></i> needs to communicate with <i>'+g['dst_name']+" <b>"+dst_txt+'</b></i> - Status : '+obj.text+'<br />\n';
     
-    // Draw goal connection line
-    drawGoalLine(g, obj.status);
-    
     return (obj.status);
 }
 
@@ -379,9 +575,6 @@ function all_goals()
     else
 	g_sim_logs = '** evaluation mode round '+g_eval_lvls.length+'**\n';
     document.getElementById("goals_id").innerHTML = '<h2>Level '+level+' : </h2>\n';
-    
-    // Clear previous goal lines
-    clearGoalLines();
     
     var nb = 0;
     goals.forEach(elem => nb += show_goals(elem));
@@ -434,6 +627,10 @@ function load_board()
     
     // Append wrapper to root
     root.appendChild(wrapper);
+    
+    // Draw visual connections between interfaces and routing tables
+    // Must be called AFTER wrapper is appended to DOM so elements are accessible
+    drawInterfaceConnections(wrapper);
 
     goals.forEach(elem => prep_goals(elem));
     
@@ -445,6 +642,12 @@ function load_board()
     
     // Initialize draggable goals panel
     initDraggableGoals();
+    
+    // Initialize draggable interfaces
+    initDraggableInterfaces();
+    
+    // Initialize draggable routing tables
+    initDraggableRoutingTables();
     
     // Initialize infinite canvas panning
     initInfiniteCanvas();
@@ -641,6 +844,264 @@ function endDrag() {
     if (goalsDiv) {
         goalsDiv.classList.remove('dragging');
     }
+}
+
+// ========= Draggable Interfaces =========
+
+var interfaceDragState = {
+    isDragging: false,
+    currentInterface: null,
+    startX: 0,
+    startY: 0,
+    elementX: 0,
+    elementY: 0
+};
+
+function initDraggableInterfaces() {
+    // Add event listeners to all interface divs
+    var interfaceDivs = document.querySelectorAll('.itf_div[data-draggable="true"]');
+    
+    interfaceDivs.forEach(function(div) {
+        div.addEventListener('mousedown', startInterfaceDrag);
+        div.addEventListener('touchstart', startInterfaceDragTouch);
+    });
+    
+    // Global listeners for move and end
+    document.addEventListener('mousemove', dragInterface);
+    document.addEventListener('mouseup', endInterfaceDrag);
+    document.addEventListener('touchmove', dragInterfaceTouch);
+    document.addEventListener('touchend', endInterfaceDrag);
+}
+
+function startInterfaceDrag(e) {
+    // Only drag if clicking on the header, not on inputs
+    if (e.target.tagName === 'INPUT') return;
+    
+    var interfaceDiv = e.currentTarget;
+    interfaceDragState.isDragging = true;
+    interfaceDragState.currentInterface = interfaceDiv;
+    interfaceDragState.startX = e.clientX;
+    interfaceDragState.startY = e.clientY;
+    
+    // Get current position relative to canvas transform
+    var rect = interfaceDiv.getBoundingClientRect();
+    var canvasWrapper = document.getElementById('canvas_wrapper');
+    var canvasRect = canvasWrapper.getBoundingClientRect();
+    
+    // Calculate position relative to canvas
+    interfaceDragState.elementX = (rect.left - canvasRect.left) / canvasState.scale;
+    interfaceDragState.elementY = (rect.top - canvasRect.top) / canvasState.scale;
+    
+    interfaceDiv.style.cursor = 'grabbing';
+    interfaceDiv.style.zIndex = '1000'; // Bring to front while dragging
+    
+    e.preventDefault();
+    e.stopPropagation(); // Prevent canvas panning
+}
+
+function startInterfaceDragTouch(e) {
+    if (e.target.tagName === 'INPUT') return;
+    
+    var touch = e.touches[0];
+    var interfaceDiv = e.currentTarget;
+    interfaceDragState.isDragging = true;
+    interfaceDragState.currentInterface = interfaceDiv;
+    interfaceDragState.startX = touch.clientX;
+    interfaceDragState.startY = touch.clientY;
+    
+    var rect = interfaceDiv.getBoundingClientRect();
+    var canvasWrapper = document.getElementById('canvas_wrapper');
+    var canvasRect = canvasWrapper.getBoundingClientRect();
+    
+    interfaceDragState.elementX = (rect.left - canvasRect.left) / canvasState.scale;
+    interfaceDragState.elementY = (rect.top - canvasRect.top) / canvasState.scale;
+    
+    interfaceDiv.style.cursor = 'grabbing';
+    interfaceDiv.style.zIndex = '1000';
+    
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function dragInterface(e) {
+    if (!interfaceDragState.isDragging) return;
+    
+    var deltaX = (e.clientX - interfaceDragState.startX) / canvasState.scale;
+    var deltaY = (e.clientY - interfaceDragState.startY) / canvasState.scale;
+    
+    var newX = interfaceDragState.elementX + deltaX;
+    var newY = interfaceDragState.elementY + deltaY;
+    
+    interfaceDragState.currentInterface.style.left = newX + 'px';
+    interfaceDragState.currentInterface.style.top = newY + 'px';
+    
+    // Update interface connection lines
+    updateInterfaceConnections();
+    
+    e.preventDefault();
+}
+
+function dragInterfaceTouch(e) {
+    if (!interfaceDragState.isDragging) return;
+    
+    var touch = e.touches[0];
+    var deltaX = (touch.clientX - interfaceDragState.startX) / canvasState.scale;
+    var deltaY = (touch.clientY - interfaceDragState.startY) / canvasState.scale;
+    
+    var newX = interfaceDragState.elementX + deltaX;
+    var newY = interfaceDragState.elementY + deltaY;
+    
+    interfaceDragState.currentInterface.style.left = newX + 'px';
+    interfaceDragState.currentInterface.style.top = newY + 'px';
+    
+    // Update interface connection lines
+    updateInterfaceConnections();
+    
+    e.preventDefault();
+}
+
+function endInterfaceDrag() {
+    if (interfaceDragState.isDragging && interfaceDragState.currentInterface) {
+        interfaceDragState.currentInterface.style.cursor = 'move';
+        interfaceDragState.currentInterface.style.zIndex = '30';
+    }
+    interfaceDragState.isDragging = false;
+    interfaceDragState.currentInterface = null;
+}
+
+// Update connection lines when interface is moved
+function updateInterfaceConnections() {
+    // Remove old interface connection lines
+    var svg = document.getElementById('sl');
+    if (!svg) return;
+    
+    var oldLines = svg.querySelectorAll('.interface-connection, .routing-connection, .topology-connection');
+    oldLines.forEach(function(line) {
+        line.parentNode.removeChild(line);
+    });
+    
+    // Redraw all connections
+    drawInterfaceConnections();
+}
+
+
+// ========= Draggable Routing Tables =========
+
+var routingTableDragState = {
+    isDragging: false,
+    currentTable: null,
+    startX: 0,
+    startY: 0,
+    elementX: 0,
+    elementY: 0
+};
+
+function initDraggableRoutingTables() {
+    var routingTables = document.querySelectorAll('[data-routing-table="true"]');
+    
+    routingTables.forEach(function(table) {
+        // Mouse events
+        table.addEventListener('mousedown', startRoutingTableDrag);
+        
+        // Touch events
+        table.addEventListener('touchstart', startRoutingTableDragTouch);
+    });
+    
+    // Global move and end handlers
+    document.addEventListener('mousemove', dragRoutingTable);
+    document.addEventListener('mouseup', endRoutingTableDrag);
+    document.addEventListener('touchmove', dragRoutingTableTouch);
+    document.addEventListener('touchend', endRoutingTableDrag);
+}
+
+function startRoutingTableDrag(e) {
+    // Don't drag if clicking on an input field
+    if (e.target.tagName === 'INPUT') {
+        return;
+    }
+    
+    var table = e.target.closest('[data-routing-table="true"]');
+    if (!table) return;
+    
+    routingTableDragState.isDragging = true;
+    routingTableDragState.currentTable = table;
+    routingTableDragState.startX = e.clientX;
+    routingTableDragState.startY = e.clientY;
+    routingTableDragState.elementX = parseInt(table.style.left) || 0;
+    routingTableDragState.elementY = parseInt(table.style.top) || 0;
+    
+    table.style.cursor = 'grabbing';
+    table.style.zIndex = '100';
+    
+    e.preventDefault();
+}
+
+function startRoutingTableDragTouch(e) {
+    // Don't drag if touching an input field
+    if (e.target.tagName === 'INPUT') {
+        return;
+    }
+    
+    var table = e.target.closest('[data-routing-table="true"]');
+    if (!table) return;
+    
+    var touch = e.touches[0];
+    routingTableDragState.isDragging = true;
+    routingTableDragState.currentTable = table;
+    routingTableDragState.startX = touch.clientX;
+    routingTableDragState.startY = touch.clientY;
+    routingTableDragState.elementX = parseInt(table.style.left) || 0;
+    routingTableDragState.elementY = parseInt(table.style.top) || 0;
+    
+    table.style.cursor = 'grabbing';
+    table.style.zIndex = '100';
+    
+    e.preventDefault();
+}
+
+function dragRoutingTable(e) {
+    if (!routingTableDragState.isDragging) return;
+    
+    var deltaX = (e.clientX - routingTableDragState.startX) / canvasState.scale;
+    var deltaY = (e.clientY - routingTableDragState.startY) / canvasState.scale;
+    
+    var newX = routingTableDragState.elementX + deltaX;
+    var newY = routingTableDragState.elementY + deltaY;
+    
+    routingTableDragState.currentTable.style.left = newX + 'px';
+    routingTableDragState.currentTable.style.top = newY + 'px';
+    
+    // Update routing table connection lines
+    updateInterfaceConnections();
+    
+    e.preventDefault();
+}
+
+function dragRoutingTableTouch(e) {
+    if (!routingTableDragState.isDragging) return;
+    
+    var touch = e.touches[0];
+    var deltaX = (touch.clientX - routingTableDragState.startX) / canvasState.scale;
+    var deltaY = (touch.clientY - routingTableDragState.startY) / canvasState.scale;
+    
+    var newX = routingTableDragState.elementX + deltaX;
+    var newY = routingTableDragState.elementY + deltaY;
+    
+    routingTableDragState.currentTable.style.left = newX + 'px';
+    routingTableDragState.currentTable.style.top = newY + 'px';
+    
+    // Update routing table connection lines
+    updateInterfaceConnections();
+    
+    e.preventDefault();
+}
+
+function endRoutingTableDrag() {
+    if (routingTableDragState.isDragging && routingTableDragState.currentTable) {
+        routingTableDragState.currentTable.style.cursor = 'move';
+        routingTableDragState.currentTable.style.zIndex = '20';
+    }
+    routingTableDragState.isDragging = false;
 }
 
 

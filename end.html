@@ -1,19 +1,148 @@
 <html>
   <head>
+    <title>Congratulations! - NetPractice</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🎉</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/netpractice.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      .completion_header {
+        font-size: 48px;
+        margin-bottom: 16px;
+      }
+      .completion_title {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--brand);
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+      }
+      .completion_message {
+        font-size: 16px;
+        line-height: 1.6;
+        color: var(--text);
+        margin-bottom: 24px;
+      }
+      .achievement_box {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(37, 99, 235, 0.1) 100%);
+        border: 2px solid rgba(37, 99, 235, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 24px 0;
+      }
+      .achievement_title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--brand);
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .skills_list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        text-align: left;
+        margin-top: 12px;
+      }
+      .skill_item {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: var(--text);
+      }
+      .skill_check {
+        color: #10b981;
+        font-weight: 700;
+        margin-right: 8px;
+        font-size: 16px;
+      }
+      .button_group {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 24px;
+      }
+      .btn_primary {
+        margin-top: 12px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        background: var(--brand);
+        color: var(--brand-contrast);
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
+        transition: all 0.2s ease;
+      }
+      .btn_primary:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      }
+      .btn_secondary {
+        margin-top: 12px;
+        padding: 12px 24px;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--brand);
+        border: 2px solid var(--brand);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
+        transition: all 0.2s ease;
+      }
+      .btn_secondary:hover {
+        background: rgba(37, 99, 235, 0.05);
+        transform: translateY(-1px);
+      }
+    </style>
   </head>
 
   <body>
-    <div class='intro_div'>
-      Completed !<br />
-      Thanks for learning basics of networking with us :) <br />
-      There are many other network-related topics that you can explore on your own. Stay curious !
-      <input type=button value="Back to start" onclick='window.location="index.html";'>
+    <div class='intro_div' style='max-width: 700px;'>
+      <div class="completion_header">🎉</div>
+      <div class="completion_title">Training Completed!</div>
+      <div class="completion_message">
+        Congratulations! You've successfully mastered the fundamentals of network configuration, 
+        IP addressing, and routing.
+      </div>
+      
+      <div class="achievement_box">
+        <div class="achievement_title">Skills Mastered</div>
+        <div class="skills_list">
+          <div class="skill_item">
+            <span class="skill_check">✓</span>
+            <span>IP Address Configuration</span>
+          </div>
+          <div class="skill_item">
+            <span class="skill_check">✓</span>
+            <span>Subnet Masking</span>
+          </div>
+          <div class="skill_item">
+            <span class="skill_check">✓</span>
+            <span>Routing Tables</span>
+          </div>
+          <div class="skill_item">
+            <span class="skill_check">✓</span>
+            <span>Network Topology</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="button_group">
+        <input type=button class="btn_primary" value="← Back to Start" onclick='window.location="index.html";'>
+        <input type=button class="btn_secondary" value="Practice Again" onclick='window.location="level1.html";'>
+      </div>
+      
+      <div class='footnote' style="margin-top: 24px;">
+        Keep practicing and exploring networking! 🌐
+      </div>
     </div>
   </body>
 </html>

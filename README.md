@@ -1,41 +1,41 @@
-# NetPractice - Interactive Networking Simulator
+# 🌐 NetPractice - Interactive Network Configuration Trainer
 
-A clean, modern web-based networking practice tool with an intuitive UI for learning IP addressing, routing, and network topology.
+A modern, interactive web-based networking practice tool with an intuitive UI for mastering IP addressing, subnetting, routing, and network topology fundamentals.
 
-## 🎨 UI Features
+## ✨ Key Features
 
-### Fullscreen Topology View
-- **100% viewport coverage**: The network topology canvas takes the entire screen for maximum visibility
-- **Draggable goals panel**: Click and drag the goals header anywhere on screen to reposition it
-- **Floating components**: Goals and controls overlay the topology without obstructing the diagram
-- **Smart scrolling**: Large topologies scroll within the viewport, preventing page overflow
+### 🎯 Interactive Canvas
+- **Infinite pan & zoom**: Navigate large topologies with ease (30%-300% zoom)
+- **Draggable components**: Reposition interfaces, routing tables, and goals panel
+- **Smart positioning**: Automatic interface placement with overlap prevention
+- **Visual connections**: Color-coded lines showing network relationships
 
-### Slide-out Logs Sidebar
-- **Toggle button**: Bottom-left corner button with live error counter
-  - Shows number of failed goals with red badge
-  - Shows success indicator when all goals pass
-- **Collapsible logs**: Click to open a right-side sidebar with detailed simulation logs
-- **Per-goal details**: Each goal has its own expandable section with color-coded logs:
-  - 🔴 **Red**: Errors and failures
-  - 🟡 **Yellow**: Warnings
-  - 🔵 **Blue**: Info messages (routing steps, packet flow)
-  - 🟢 **Green**: Success messages
+### 🎨 Modern UI/UX
+- **Light theme**: Clean, professional design optimized for learning
+- **Responsive layout**: Works on desktop, tablet, and large mobile devices
+- **Smooth animations**: Polished transitions and hover effects
+- **Slide-out logs**: Expandable sidebar with detailed simulation results
 
-### Enhanced Visual Connections
-- **Connection lines**: Clear lines between devices with rounded caps
-- **Connection indicators**: Blue circles mark interface connection points
-- **Visual hierarchy**: Proper z-index layering keeps interfaces and labels above connection lines
+### 🔗 Connection Visualization
+- **Gray dotted lines**: Host → Interface connections
+- **Gray dashed lines**: Host → Routing Table connections
+- **Blue dashed lines**: Network topology infrastructure
+  - Host ↔ Router/Switch
+  - Router ↔ Internet
+  - Router ↔ Router
+- **Real-time updates**: Lines redraw when components are dragged
 
-### Modern Interface Cards
-- **Gradient backgrounds**: Subtle gradients on interface cards for depth
-- **Focus states**: Input fields highlight on focus with blue outline
-- **Improved typography**: Poppins font throughout for clean, modern look
-- **Better spacing**: Optimized padding and margins for readability
+### 🎓 Progressive Learning
+- **10 Levels**: From basic IP configuration to complex multi-router setups
+- **Instant validation**: Real-time feedback on configuration correctness
+- **Per-goal tracking**: Visual indicators for each objective
+- **Evaluation mode**: Timed challenge (3 random levels in 15 minutes)
 
-### Responsive Design
-- Viewport meta tags ensure proper scaling on all devices
-- Flexible layouts adapt to different screen sizes
-- Touch-friendly controls for tablets and mobile devices
+### 🛠️ Enhanced Components
+- **Draggable Interfaces**: Move to avoid overlaps and improve clarity
+- **Draggable Routing Tables**: Orange-themed, compact, repositionable
+- **Collapsible Logs**: Per-goal error tracking with color-coded messages
+- **Canvas Controls**: Zoom in/out, reset view buttons
 
 ## 🚀 Quick Start
 

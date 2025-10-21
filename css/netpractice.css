@@ -452,16 +452,24 @@ div, table, input {
 
 /* host info (name, route) div */
 .host_info_div {
-    min-width: 180px;
+    min-width: 130px;
     min-height: 50px;
-    background: rgba(255, 255, 255, 0.96);
+    background: linear-gradient(135deg, rgba(255, 247, 237, 0.98) 0%, rgba(254, 243, 231, 0.98) 100%);
     backdrop-filter: blur(4px);
-    border: 1px solid var(--border);
+    border: 2px solid rgba(251, 146, 60, 0.4);
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(15,23,42,0.08);
+    box-shadow: 0 2px 8px rgba(251, 146, 60, 0.15);
     padding: 4px;
     z-index: 20;
+    cursor: move;
+    transition: all 0.2s ease;
     /* will be updated by script : position, top, left */
+}
+
+.host_info_div:hover {
+    border-color: rgba(251, 146, 60, 0.6);
+    box-shadow: 0 4px 12px rgba(251, 146, 60, 0.25);
+    transform: translateY(-1px);
 }
 
 .host_info_div table {
@@ -471,14 +479,15 @@ div, table, input {
 }
 
 .host_info_div input[type="text"] {
-    padding: 4px 7px;
+    padding: 3px 5px;
     border: 1px solid var(--border);
     border-radius: 6px;
     outline: none;
-    font-size: 11px;
+    font-size: 10px;
     font-family: 'Poppins', monospace;
     transition: border-color 0.2s ease;
     box-sizing: border-box;
+    width: 90px;
 }
 
 .host_info_div input[type="text"]:focus {
@@ -506,7 +515,18 @@ div, table, input {
     padding: 4px;
     z-index: 30;
     pointer-events: auto; /* ensure interfaces can be interacted with */
+    cursor: move;
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
     /* will be updated by script : position, top, left */
+}
+
+.itf_div:hover {
+    box-shadow: 0 4px 12px rgba(15,23,42,0.15);
+    transform: translateY(-1px);
+}
+
+.itf_div:active {
+    cursor: grabbing;
 }
 
 .itf_div table {

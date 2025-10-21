@@ -1,22 +1,125 @@
 <html>
   <head>
+    <title>NetPractice - Network Configuration Trainer</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🌐</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/netpractice.css">
     <script src="js/intro.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive network configuration training platform - Learn IP addressing, subnetting, and routing">
+    <style>
+      .intro_header {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--brand);
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+      }
+      .intro_subtitle {
+        font-size: 16px;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+        font-weight: 400;
+      }
+      .intro_description {
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        color: var(--text);
+      }
+      .input_section {
+        background: rgba(241, 245, 249, 0.5);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+      .input_label {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--text);
+        display: block;
+      }
+      .evaluation_note {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 12px;
+        padding: 12px;
+        background: rgba(251, 146, 60, 0.1);
+        border-left: 3px solid rgba(251, 146, 60, 0.5);
+        border-radius: 6px;
+        text-align: left;
+      }
+      .features_grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin: 20px 0;
+        text-align: left;
+      }
+      .feature_item {
+        display: flex;
+        align-items: center;
+        font-size: 13px;
+        color: var(--text);
+      }
+      .feature_icon {
+        width: 6px;
+        height: 6px;
+        background: var(--brand);
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+    </style>
   </head>
 
   <body>
     <div class='intro_div'>
-      Welcome to 42's NetPractice !<br />
-      Please enter your intranet login (the moulinette will use it to know your own configuration) : <br />
-      <input id='input_login' type=text size=8><br />
-      Or leave empty for a defense : 3 random level from 6 to 10 will be offered to be solved in 15 minutes.<br />
-      <span class='footnote'>Note: the architecture and addresses used in the following levels are fictionnous and are not connected to real configurations.</span><br />
-      <input type=button value="Start !" onclick='save_login();'>
+      <div class="intro_header">NetPractice</div>
+      <div class="intro_subtitle">Interactive Network Configuration Trainer</div>
+      
+      <div class="intro_description">
+        Master the fundamentals of networking through hands-on practice with IP addressing, 
+        subnetting, and routing configurations in a visual, interactive environment.
+      </div>
+      
+      <div class="features_grid">
+        <div class="feature_item">
+          <div class="feature_icon"></div>
+          <span>10 Progressive Levels</span>
+        </div>
+        <div class="feature_item">
+          <div class="feature_icon"></div>
+          <span>Interactive Topology</span>
+        </div>
+        <div class="feature_item">
+          <div class="feature_icon"></div>
+          <span>Instant Validation</span>
+        </div>
+        <div class="feature_item">
+          <div class="feature_icon"></div>
+          <span>Draggable Components</span>
+        </div>
+      </div>
+      
+      <div class="input_section">
+        <label class="input_label">Enter your intranet login (optional):</label>
+        <input id='input_login' type=text size=8 placeholder="e.g., jdoe">
+        
+        <div class="evaluation_note">
+          <strong>💡 Evaluation Mode:</strong> Leave empty for a defense simulation — 
+          3 random levels (6-10) to solve in 15 minutes.
+        </div>
+      </div>
+      
+      <input type=button value="Start Training →" onclick='save_login();'>
+      
+      <div class='footnote' style="margin-top: 20px;">
+        Note: All architectures and IP addresses used are fictional and not connected to real configurations.
+      </div>
     </div>
     <script>document.getElementById('input_login').value = load_login();</script>
   </body>
