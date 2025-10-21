@@ -7,12 +7,9 @@ function save_login()
     localStorage.setItem("g_my_login", login);
     if (login == '')
     {
-	// Generate 3 random levels from 6 to 10 for evaluation mode
-	var lvl1 = Math.round(6 + 4*Math.random());
-	var lvl2 = Math.round(6 + 4*Math.random());
-	var lvl3 = Math.round(6 + 4*Math.random());
-	localStorage.setItem("g_my_eval", JSON.stringify([lvl1, lvl2, lvl3]));
-	window.location = "level"+lvl1+".html";
+	var lvl = Math.round(6 + 4*Math.random());
+	localStorage.setItem("g_my_eval", JSON.stringify([lvl]));
+	window.location = "level"+lvl+".html";
     }
     else
 	window.location = 'level1.html';

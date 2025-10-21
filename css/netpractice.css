@@ -30,10 +30,22 @@ body {
     padding: 0;
     margin: 0;
     position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 div, table, input {
     box-sizing: border-box;
+}
+
+/* Allow text selection only in input fields */
+input[type="text"] {
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
 }
 
 /* message box in index.html */
